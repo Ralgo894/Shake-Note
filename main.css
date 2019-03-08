@@ -2,11 +2,8 @@
   margin: 0;
 }
 
-body {
-  position: fixed;
-}
-
 input[type=button] {
   width: 100vw;
   height: 100vh;
+  border-radius: 0;
 }
