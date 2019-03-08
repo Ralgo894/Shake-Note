@@ -3,7 +3,7 @@ var ctx = new AudioContext();
 var bufferSize = 1024;
 var numberOfInputChannels = 1;
 var numberOfOutputChannels = 1;
-var node = ctx.createScriptProcessor(bufferSize, numberOfInputChannels, numberOfOutputChannels);
+node = ctx.createScriptProcessor(bufferSize, numberOfInputChannels, numberOfOutputChannels);
 
 var gainNode = ctx.createGain();
 gainNode.gain.value = 0.2;
@@ -26,15 +26,15 @@ node.onaudioprocess = function(e) {
 var playButton = document.getElementById('play');
 
 playButton.addEventListener('touchstart', e => {
-  // ズーム無効
-  if (event.touches.length > 1) {
-    event.preventDefault();
-  }
-
   ctx.resume().then(() => {
     node.connect(gainNode);
     gainNode.connect(ctx.destination);
   })
+
+  // ズーム無効
+  if (event.touches.length > 1) {
+    event.preventDefault();
+  }
 });
 
 window.addEventListener('deviceorientation', e => {
@@ -43,14 +43,14 @@ window.addEventListener('deviceorientation', e => {
 
 var lastTouch;
 playButton.addEventListener('touchend', () => {
+  node.disconnect();
+
   // ズーム無効
   const now = window.performance.now();
   if (now - lastTouch <= 500) {
     event.preventDefault();
   }
   lastTouch = now;
-
-  node.disconnect();
 });
 
 function createFrequency(e) {
