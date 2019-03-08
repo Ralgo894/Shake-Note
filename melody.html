@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ja" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Shake-Note</title>
+    <link rel="stylesheet" href="css/reset.css">
+    <link rel="stylesheet" href="css/main.css">
+  </head>
+  <body>
+    <div class="center max">
+      <p id="scaleStoring">C5</p>
+    </div>
+
+    <script type="text/javascript">
+      var AudioContext = window.AudioContext || window.webkitAudioContext;
+      var ctx = new AudioContext();
+      var osc;
+      var gainNode = ctx.createGain();
+      gainNode.gain.value = 0.2;
+
+      var textElement = document.getElementById('scaleStoring');
+
+      var noteList = (() => {
+        var array = Array(85);
+        for (var i = 0; i < array.length; i++) {
+          array[i] = 27.500 * Math.pow(2, i / 12);
+        }
+        return array;
+      })();
+      var scaleList = [
+        ["A", "A"],
+        ["A#", "B♭"],
+        ["B", "B"],
+        ["C", "C"],
+        ["C#", "D♭"],
+        ["D", "D"],
+        ["D#", "E♭"],
+        ["E", "E"],
+        ["F", "F"],
+        ["F#", "G♭"],
+        ["G", "G"],
+        ["G#", "A♭"]
+      ];
+      var startNoteIndex = 39;
+      var scaleCount = 24;
+
+
+      // 最初のタップ
+      document.addEventListener('touchstart', firstTouch);
+      function firstTouch() {
+        document.removeEventListener('touchstart', firstTouch);
+
+        osc = ctx.createOscillator();
+        osc.frequency.value = 440;
+        osc.connect(gainNode);
+        gainNode.connect(ctx.destination);
+        osc.start();
+      }
+
+      // 振ったときの音量up
+      window.addEventListener('devicemotion', e => {
+        var x = e.accelerationIncludingGravity.x; // X方向の加速度
+        var y = e.accelerationIncludingGravity.y; // Y方向の加速度
+        var z = e.accelerationIncludingGravity.z; // Z方向の加速度
+        var speedFlag = 5;
+
+        var volume = Math.max(Math.abs(x), Math.abs(y), Math.abs(z)) / 10 - 1;
+        if (volume < 0) volume = 0;
+
+        if (volume > gainNode.gain.value) {
+          gainNode.gain.value = volume;
+        }
+      });
+
+      // 時間経過で音量down
+      setInterval(function () {
+        var volume = gainNode.gain.value - 0.025;
+        if (volume < 0) volume = 0;
+        gainNode.gain.value = volume;
+      }, 1);
+
+      // 傾きで音程変更
+      window.addEventListener('deviceorientation', e => {
+        var rotation = e.alpha;
+        var index = createNoteIndex(rotation);
+        osc.frequency.value = noteList[index];
+
+        var scale = createScaleString(index);
+        textElement.textContent = scale;
+
+        textElement.style.transform = `rotateZ(${rotation}deg)`;
+
+      });
+
+
+      function createNoteIndex(rotation) {
+        var rate = (rotation / 360 + 0.5) % 1;
+        return Math.floor(scaleCount * rate) + startNoteIndex;
+      }
+
+      function createScaleString(index) {
+        return scaleList[index % 12][0] + Math.floor((index + 9) / 12);
+      }
+
+    </script>
+  </body>
+</html>

@@ -1,0 +1,16 @@
+.center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.max {
+  width: 100vw;
+  height: 100vh;
+}
+
+#scaleStoring {
+  display: block;
+  font-size: 30vmin;
+  text-align: center;
+}
