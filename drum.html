@@ -17,18 +17,22 @@
       var AudioContext = window.AudioContext || window.webkitAudioContext;
       var ctx = new AudioContext();
 
-      var sourceKick = ctx.createBufferSource();
+      var bufferKick;
       var gainNodeKick = ctx.createGain();
-      gainNodeKick.gain.value = 0.2;
+      gainNodeKick.gain.value = 1;
+      var bufferCHH;
+      var gainNodeCHH = ctx.createGain();
+      gainNodeKick.gain.value = 1;
 
 
       window.onload = () => {
         getAudioBuffer('https://ralgo894.github.io/Shake-Note/audio/kick.wav')
         .then(buffer => {
-          sourceKick.buffer = buffer;
-          sourceKick.connect(gainNodeKick);
-          gainNodeKick.connect(ctx.destination);
-          alert('kick ok');
+          bufferKick = buffer;
+        });
+        getAudioBuffer('https://ralgo894.github.io/Shake-Note/audio/kick.wav')
+        .then(buffer => {
+          bufferCHH = buffer;
         });
       };
 
@@ -41,6 +45,8 @@
         emptySource.stop();
       }
 
+      var HHFlag = false;
+      var kickFlag = false;
       window.addEventListener('devicemotion', e => {
         var x = e.accelerationIncludingGravity.x; // X方向の加速度
         var y = e.accelerationIncludingGravity.y; // Y方向の加速度
@@ -49,11 +55,31 @@
 
         scaleStoring.textContent = Math.floor(y);
 
-        if (y <= -15) {
+        if (y >= 15 && !kickFlag && !HHFlag) {
+          kickFlag = true;
+          var sourceKick = ctx.createBufferSource();
+          sourceKick.buffer = bufferKick;
+          gainNodeKick.gain.value = Math.abs(y) / 10 - 1;
+          sourceKick.connect(gainNodeKick);
+          gainNodeKick.connect(ctx.destination);
           sourceKick.start(0);
+          setTimeout(function () {
+            kickFlag = false;
+          }, 50);
         }
 
-        // var volume = Math.max(Math.abs(x), Math.abs(y), Math.abs(z)) / 10 - 1;
+        if (y <= -15 && !HHFlag && !kickFlag) {
+          HHFlag = true;
+          var sourceKick = ctx.createBufferSource();
+          sourceKick.buffer = bufferCHH;
+          gainNodeKick.gain.value = Math.abs(y) / 10 - 1;
+          sourceKick.connect(gainNodeCHH);
+          gainNodeKick.connect(ctx.destination);
+          sourceKick.start(0);
+          setTimeout(function () {
+            HHFlag = false;
+          }, 50);
+        }
       });
 
       // 傾きで音程変更
