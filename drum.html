@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ja" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <title>Shake-Note</title>
+    <link rel="stylesheet" href="css/reset.css">
+    <link rel="stylesheet" href="css/main.css">
+  </head>
+  <body>
+    <div class="center max">
+      <p id="scaleStoring">C5</p>
+    </div>
+
+    <script type="text/javascript">
+      var AudioContext = window.AudioContext || window.webkitAudioContext;
+      var ctx = new AudioContext();
+
+      var sourceKick = ctx.createBufferSource();
+      var gainNodeKick = ctx.createGain();
+      gainNodeKick.gain.value = 0.2;
+
+
+      window.onload = () => {
+        getAudioBuffer('audio/kick.wav')
+        .then(buffer => {
+          sourceKick.buffer = buffer;
+          sourceKick.connect(gainNodeKick);
+          gainNodeKick.connect(ctx.destination);
+        });
+      };
+
+      // 最初のタップ
+      document.addEventListener('touchstart', initAudioContext);
+      function initAudioContext() {
+        document.removeEventListener('touchstart', initAudioContext);
+        const emptySource = ctx.createBufferSource();
+        emptySource.start();
+        emptySource.stop();
+      }
+
+      window.addEventListener('devicemotion', e => {
+        var x = e.accelerationIncludingGravity.x; // X方向の加速度
+        var y = e.accelerationIncludingGravity.y; // Y方向の加速度
+        var z = e.accelerationIncludingGravity.z; // Z方向の加速度
+        var speedFlag = 5;
+
+        if (y <= -15) {
+          sourceKick.start(0);
+        }
+
+        // var volume = Math.max(Math.abs(x), Math.abs(y), Math.abs(z)) / 10 - 1;
+      });
+
+      // 傾きで音程変更
+      window.addEventListener('deviceorientation', e => {
+        var rotation = e.alpha;
+      });
+
+      function getAudioBuffer(url) {
+        return new Promise(function(resolve, reject) {
+          var xhr = new XMLHttpRequest();
+          xhr.responseType = 'arraybuffer';
+          xhr.addEventListener('loadend', () => {
+            // array buffer を audio buffer に変換
+            ctx.decodeAudioData(xhr.response, function(buffer) {
+              resolve(buffer);
+            });
+          });
+          xhr.open('GET', url, true);
+          xhr.send(null);
+        });
+      }
+
+
+    </script>
+  </body>
+</html>
