@@ -22,7 +22,13 @@
       gainNodeKick.gain.value = 1;
       var bufferCHH;
       var gainNodeCHH = ctx.createGain();
-      gainNodeKick.gain.value = 1;
+      gainNodeCHH.gain.value = 1;
+      var bufferSnare;
+      var gainNodeSnare = ctx.createGain();
+      gainNodeSnare.gain.value = 1;
+      var bufferCymbal;
+      var gainNodeCymbal = ctx.createGain();
+      gainNodeCymbal.gain.value = 1;
 
 
       window.onload = () => {
@@ -30,9 +36,17 @@
         .then(buffer => {
           bufferKick = buffer;
         });
-        getAudioBuffer('https://ralgo894.github.io/Shake-Note/audio/kick.wav')
+        getAudioBuffer('https://ralgo894.github.io/Shake-Note/audio/chh.wav')
         .then(buffer => {
           bufferCHH = buffer;
+        });
+        getAudioBuffer('https://ralgo894.github.io/Shake-Note/audio/snare.wav')
+        .then(buffer => {
+          bufferSnare = buffer;
+        });
+        getAudioBuffer('https://ralgo894.github.io/Shake-Note/audio/cymbal.wav')
+        .then(buffer => {
+          buffercymbal = buffer;
         });
       };
 
@@ -45,45 +59,91 @@
         emptySource.stop();
       }
 
+      // window.addEventListener('devicemotion', e => {
+      //   var x = e.accelerationIncludingGravity.x; // X方向の加速度
+      //   var y = e.accelerationIncludingGravity.y; // Y方向の加速度
+      //   var z = e.accelerationIncludingGravity.z; // Z方向の加速度
+      //   var speedFlag = 5;
+      //
+      //   scaleStoring.textContent = Math.floor(y);
+      //
+      //   if (y <= -18 && !kickFlag && !HHFlag) {
+      //     kickFlag = true;
+      //     var sourceKick = ctx.createBufferSource();
+      //     sourceKick.buffer = bufferKick;
+      //     gainNodeKick.gain.value = Math.abs(y) / 10 - 1;
+      //     sourceKick.connect(gainNodeKick);
+      //     gainNodeKick.connect(ctx.destination);
+      //     sourceKick.start(0);
+      //     setTimeout(function () {
+      //       kickFlag = false;
+      //     }, 70);
+      //   }
+      //
+      //   if (y >= 18 && !kickFlag && !HHFlag) {
+      //     HHFlag = true;
+      //     var sourceCHH = ctx.createBufferSource();
+      //     sourceCHH.buffer = bufferCHH;
+      //     gainNodeCHH.gain.value = Math.abs(y) / 10 - 1;
+      //     sourceCHH.connect(gainNodeCHH);
+      //     gainNodeCHH.connect(ctx.destination);
+      //     sourceCHH.start(0);
+      //     setTimeout(function () {
+      //       HHFlag = false;
+      //     }, 70);
+      //   }
+      //
+      //   if (x <= -18 && !snareFlag && !cymbalFlag) {
+      //     snareFlag = true;
+      //     var sourceSnare = ctx.createBufferSource();
+      //     sourceSnare.buffer = bufferSnare;
+      //     gainNodeSnare.gain.value = Math.abs(x) / 10 - 1;
+      //     sourceSnare.connect(gainNodeSnare);
+      //     gainNodeSnare.connect(ctx.destination);
+      //     sourceSnare.start(0);
+      //     setTimeout(function () {
+      //       snareFlag = false;
+      //     }, 70);
+      //   }
+      //
+      //   if (x >= 18 && !snareFlag && !cymbalFlag) {
+      //     cymbalFlag = true;
+      //
+      //     setTimeout(function () {
+      //       cymbalFlag = false;
+      //     }, 70);
+      //   }
+      //
+      // });
+
+
       var HHFlag = false;
       var kickFlag = false;
-      window.addEventListener('devicemotion', e => {
-        var x = e.accelerationIncludingGravity.x; // X方向の加速度
-        var y = e.accelerationIncludingGravity.y; // Y方向の加速度
-        var z = e.accelerationIncludingGravity.z; // Z方向の加速度
-        var speedFlag = 5;
-
-        scaleStoring.textContent = Math.floor(y);
-
-        if (y >= 15 && !kickFlag && !HHFlag) {
+      var snareFlag = false;
+      var cymbalFlag = false;
+      window.addEventListener('deviceorientation', e => {
+        if (e.gamma > 20 && !kickFlag) {
           kickFlag = true;
           var sourceKick = ctx.createBufferSource();
           sourceKick.buffer = bufferKick;
-          gainNodeKick.gain.value = Math.abs(y) / 10 - 1;
+          gainNodeKick.gain.value = Math.abs(e.gamma) / 20 - 1;
           sourceKick.connect(gainNodeKick);
           gainNodeKick.connect(ctx.destination);
           sourceKick.start(0);
-          setTimeout(function () {
-            kickFlag = false;
-          }, 50);
-        }
+        } else { kickFlag = false; }
 
-        if (y <= -15 && !HHFlag && !kickFlag) {
+        if (e.gamma < -20 && !HHFlag) {
           HHFlag = true;
-          var sourceKick = ctx.createBufferSource();
-          sourceKick.buffer = bufferCHH;
-          gainNodeKick.gain.value = Math.abs(y) / 10 - 1;
-          sourceKick.connect(gainNodeCHH);
-          gainNodeKick.connect(ctx.destination);
-          sourceKick.start(0);
-          setTimeout(function () {
-            HHFlag = false;
-          }, 50);
-        }
-      });
+          var sourceCHH = ctx.createBufferSource();
+          sourceCHH.buffer = bufferCHH;
+          gainNodeCHH.gain.value = Math.abs(e.gamma) / 20 - 1;
+          sourceCHH.connect(gainNodeCHH);
+          gainNodeCHH.connect(ctx.destination);
+          sourceCHH.start(0);
+        } else { HHFlag = false; }
 
-      // 傾きで音程変更
-      window.addEventListener('deviceorientation', e => {
+
+
         var rotation = e.alpha;
       });
 
