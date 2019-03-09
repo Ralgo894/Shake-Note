@@ -23,11 +23,12 @@
 
 
       window.onload = () => {
-        getAudioBuffer('audio/kick.wav')
+        getAudioBuffer('https://ralgo894.github.io/Shake-Note/audio/kick.wav')
         .then(buffer => {
           sourceKick.buffer = buffer;
           sourceKick.connect(gainNodeKick);
           gainNodeKick.connect(ctx.destination);
+          alert('kick ok');
         });
       };
 
@@ -45,6 +46,8 @@
         var y = e.accelerationIncludingGravity.y; // Y方向の加速度
         var z = e.accelerationIncludingGravity.z; // Z方向の加速度
         var speedFlag = 5;
+
+        scaleStoring.textContent = Math.floor(y);
 
         if (y <= -15) {
           sourceKick.start(0);
